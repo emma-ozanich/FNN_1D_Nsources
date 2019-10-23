@@ -1,0 +1,28 @@
+matlab -nodesktop
+snr_vec = [0];
+snap_vec = [10];
+%testfile = 'swellex96_';
+testfile = '5track_';
+
+tic;
+for snr = snr_vec
+    for sna = snap_vec
+        run sbl_config_vla.m % or sbl_config_swellex96.m
+        % for VLA
+        test = load([fpath 'test/' fname testfile num2str(sna) 'snaps']);
+        test = test.data.TEST;
+        
+        % for swellex
+       % test = load(['data/Experiment_test_arraydata_' num2str(sna) 'snap']); 
+       % test = test.A;
+        
+        sbl = zeros(size(test,3),180);
+        
+        parfor ii=1:size(test,3)
+            [sbl(ii,:),~] = SBL_v3p12_ForPython(beam, test(:,1:sna,ii), options);
+        end
+        
+        save([fpath fname(1:(end-1)) '_' num2str(sna,'%02d') '_snaps_sbl_' testfile(1:end-1)],'sbl');
+        toc
+     end
+end
